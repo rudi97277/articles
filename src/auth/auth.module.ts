@@ -3,12 +3,22 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { AdministratorsService } from 'src/administrators/administrators.service';
 import { Administrator } from 'src/administrators/entities/administrator.entity';
-import { Repository } from 'typeorm';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Administrator])],
+  imports: [
+    TypeOrmModule.forFeature([Administrator]),
+    JwtModule.registerAsync({
+      useFactory: () => ({
+        global: true,
+        secret: process.env.SECRET,
+        signOptions: { expiresIn: '600s' },
+      }),
+    }),
+  ],
   controllers: [AuthController],
   providers: [AuthService, AdministratorsService],
+  exports: [AuthService],
 })
 export class AuthModule {}

@@ -1,18 +1,27 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { AdministratorsService } from 'src/administrators/administrators.service';
+import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
-  constructor(private administratorService: AdministratorsService) {}
+  constructor(
+    private administratorService: AdministratorsService,
+    private jwtService: JwtService,
+  ) {}
 
   async login(username: string, pass: string): Promise<any> {
     const administrator = await this.administratorService.findOne(username);
-    const isMatch = bcrypt.compare(pass, administrator?.password);
-    if (!isMatch || !administrator) throw new UnauthorizedException();
 
-    const { password, ...result } = administrator;
+    const isMatch =
+      administrator && (await bcrypt.compare(pass, administrator?.password));
 
-    return result;
+    if (!isMatch) throw new UnauthorizedException();
+
+    const payload = { sub: administrator.id, username: administrator.username };
+    return {
+      access_token: await this.jwtService.signAsync(payload),
+      full_name: administrator.fullName,
+    };
   }
 }
