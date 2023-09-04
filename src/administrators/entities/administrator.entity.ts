@@ -9,7 +9,6 @@ import {
 } from 'typeorm';
 
 @Entity()
-@Unique(['email'])
 @Unique(['username'])
 export class Administrator {
   @PrimaryGeneratedColumn()
@@ -19,18 +18,13 @@ export class Administrator {
   username: string;
 
   @Column()
-  email: string;
+  @Exclude()
+  password: string;
 
   @Column({
     name: 'full_name',
   })
   fullName: string;
-
-  @Column({
-    select: false,
-  })
-  @Exclude()
-  password: string;
 
   @CreateDateColumn({
     name: 'created_at',

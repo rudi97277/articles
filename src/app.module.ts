@@ -1,12 +1,11 @@
 import { Module, ValidationPipe } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { AdministratorsModule } from './administrators/administrators.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { Administrator } from './administrators/entities/administrator.entity';
 import { join } from 'path';
 import { APP_PIPE } from '@nestjs/core';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -25,7 +24,7 @@ import { APP_PIPE } from '@nestjs/core';
       }),
       inject: [ConfigService],
     }),
-    AdministratorsModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [
