@@ -1,30 +1,24 @@
-import { Exclude } from 'class-transformer';
 import {
   Column,
   CreateDateColumn,
   Entity,
   PrimaryGeneratedColumn,
-  Unique,
   UpdateDateColumn,
 } from 'typeorm';
 
-@Entity('administrators')
-@Unique(['username'])
-export class Administrator {
+@Entity('article_documents')
+export class ArticleDocument {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
-  username: string;
+  title: string;
 
   @Column()
-  @Exclude()
-  password: string;
+  description: string;
 
-  @Column({
-    name: 'full_name',
-  })
-  fullName: string;
+  @Column()
+  cover: string;
 
   @CreateDateColumn({
     name: 'created_at',
