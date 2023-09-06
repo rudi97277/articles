@@ -5,38 +5,32 @@ import {
   Param,
   UseInterceptors,
   UploadedFile,
-  ParseFilePipeBuilder,
-  HttpStatus,
+  Request,
+  UseGuards,
 } from '@nestjs/common';
 import { DocumentsService } from './documents.service';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { storage } from 'src/storage.config';
+import { imageFileFilter, storage } from 'src/storage.config';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('documents')
 export class DocumentsController {
   constructor(private readonly documentsService: DocumentsService) {}
 
   @Post('upload')
-  @UseInterceptors(FileInterceptor('file', { storage }))
-  async uploadFile(
-    @UploadedFile(
-      new ParseFilePipeBuilder()
-        .addFileTypeValidator({
-          fileType: '.(jpeg|png|jpg)',
-        })
-        .addMaxSizeValidator({
-          maxSize: 1000 * 1000,
-        })
-        .build({
-          errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-          fileIsRequired: true,
-        }),
-    )
-    file: Express.Multer.File,
-  ) {
-    return file;
-  }
+  @UseGuards(AuthGuard)
+  @UseInterceptors(
+    FileInterceptor('file', { storage, fileFilter: imageFileFilter }),
+  )
+  async uploadedFile(@UploadedFile() file, @Request() req) {
+    const { sub } = req.administrator;
 
+    const document = this.documentsService.create({
+      ...file,
+      administratorId: sub,
+    });
+    return document;
+  }
   @Get(':id')
   getFile(@Param('id') id: string) {
     return this.documentsService.findOne(+id);

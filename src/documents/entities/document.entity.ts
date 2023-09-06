@@ -21,23 +21,24 @@ export class Document {
   @JoinColumn({ name: 'administrator_id' })
   administrator: Administrator;
 
-  @Column({
-    name: 'file_name',
-  })
-  fileName: string;
-
-  @Column({
-    name: 'original_file_name',
-  })
-  originalFileName: string;
-
-  @Column({
-    name: 'mime_type',
-  })
-  memeType: string;
+  @Column()
+  filename: string;
 
   @Column()
-  size: string;
+  path: string;
+
+  @Column({
+    name: 'originalname',
+  })
+  originalname: string;
+
+  @Column({
+    name: 'mimetype',
+  })
+  mimetype: string;
+
+  @Column()
+  size: number;
 
   @CreateDateColumn({
     name: 'created_at',

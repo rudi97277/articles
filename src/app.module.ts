@@ -17,7 +17,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
       isGlobal: true,
     }),
     MulterModule.register({
-      dest: './uploads',
+      dest: './public/img',
     }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'uploads'),

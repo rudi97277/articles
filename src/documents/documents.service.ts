@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Document } from './entities/document.entity';
+import { CreateDocumentDto } from './dto/create-document.dto';
 
 @Injectable()
 export class DocumentsService {
@@ -9,10 +10,8 @@ export class DocumentsService {
     @InjectRepository(Document)
     private documentRepository: Repository<Document>,
   ) {}
-  uploadFile(file: Express.Multer.File) {
-    console.log(file);
-
-    return 'This action adds a new document';
+  create(createDocumentDto: CreateDocumentDto) {
+    return this.documentRepository.save(createDocumentDto);
   }
 
   findOne(id: number) {
