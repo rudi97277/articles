@@ -6,16 +6,7 @@ import { Document } from './entities/document.entity';
 import { JwtModule } from '@nestjs/jwt';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Document]),
-    JwtModule.registerAsync({
-      useFactory: () => ({
-        global: true,
-        secret: process.env.SECRET,
-        signOptions: { expiresIn: '600s' },
-      }),
-    }),
-  ],
+  imports: [TypeOrmModule.forFeature([Document]), JwtModule],
   controllers: [DocumentsController],
   providers: [DocumentsService],
 })

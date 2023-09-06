@@ -1,4 +1,4 @@
-import { IsNotEmpty } from 'class-validator';
+import { ArrayNotEmpty, IsArray, IsNotEmpty, IsObject } from 'class-validator';
 
 export class CreateArticleDto {
   @IsNotEmpty()
@@ -8,5 +8,10 @@ export class CreateArticleDto {
   description: string;
 
   @IsNotEmpty()
-  cover: string;
+  coverId: string;
+
+  @IsNotEmpty()
+  @IsArray()
+  @ArrayNotEmpty()
+  documents: string[];
 }

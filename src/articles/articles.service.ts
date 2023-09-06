@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Article } from './entities/article.entity';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { ArticleDocument } from './entities/article-document.entity';
+import { Document } from 'src/documents/entities/document.entity';
 
 @Injectable()
 export class ArticlesService {
@@ -12,10 +13,42 @@ export class ArticlesService {
     @InjectRepository(Article) private articleRepository: Repository<Article>,
     @InjectRepository(ArticleDocument)
     private articleDocumentRepository: Repository<ArticleDocument>,
+    @InjectRepository(Document)
+    private documentRepository: Repository<Document>,
   ) {}
 
-  create(createArticleDto: CreateArticleDto) {
-    return this.articleRepository.save(createArticleDto);
+  async create(createArticleDto: CreateArticleDto) {
+    const { documents, coverId, ...articleData } = createArticleDto;
+
+    const totalDocument: number = documents.length + 1;
+    const allDocument = documents.concat(coverId);
+
+    const documentCount = await this.documentRepository.count({
+      where: {
+        id: In([allDocument]),
+      },
+    });
+
+    if (totalDocument !== documentCount)
+      throw new HttpException('One or more document not found!', 422);
+
+    const article = await this.articleRepository.save({
+      ...articleData,
+      coverId,
+    });
+
+    if (documents) {
+      const formattedDocument = documents.map((document) => {
+        return {
+          documentId: document,
+          articleId: article.id,
+        };
+      });
+
+      await this.articleDocumentRepository.insert(formattedDocument);
+    }
+
+    return article;
   }
 
   findAll() {
