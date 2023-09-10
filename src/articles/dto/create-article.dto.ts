@@ -13,5 +13,5 @@ export class CreateArticleDto {
   @IsNotEmpty()
   @IsArray()
   @ArrayNotEmpty()
-  documents: string[];
+  documentIds: string[];
 }

@@ -1,9 +1,12 @@
 import { Administrator } from 'src/administrators/entities/administrator.entity';
+import { Article } from 'src/articles/entities/article.entity';
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   JoinColumn,
+  ManyToMany,
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -12,13 +15,10 @@ import {
 @Entity('documents')
 export class Document {
   @PrimaryGeneratedColumn('uuid')
-  id: number;
+  id: string;
 
-  @Column({ name: 'administrator_id' })
-  administratorId: number;
-
-  @ManyToOne((type) => Administrator, (administrator) => administrator.id)
-  @JoinColumn({ name: 'administrator_id' })
+  @ManyToOne(() => Administrator)
+  @JoinColumn()
   administrator: Administrator;
 
   @Column()
@@ -27,28 +27,25 @@ export class Document {
   @Column()
   path: string;
 
-  @Column({
-    name: 'originalname',
-  })
+  @Column()
   originalname: string;
 
-  @Column({
-    name: 'mimetype',
-  })
+  @Column()
   mimetype: string;
 
   @Column()
   size: number;
 
   @CreateDateColumn({
-    name: 'created_at',
     type: 'timestamp',
   })
   createdAt: Date;
 
   @UpdateDateColumn({
-    name: 'updated_at',
     type: 'timestamp',
   })
   updatedAt: Date;
+
+  @ManyToMany(() => Article, (article) => article.documents)
+  articles: Article[];
 }

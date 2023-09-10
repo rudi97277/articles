@@ -5,11 +5,18 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Request } from 'express';
+import { Administrator } from 'src/administrators/entities/administrator.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private jwtService: JwtService) {}
+  constructor(
+    private jwtService: JwtService,
+    @InjectRepository(Administrator)
+    private administratorRepositoty: Repository<Administrator>,
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
@@ -21,7 +28,14 @@ export class AuthGuard implements CanActivate {
       const payload = await this.jwtService.verifyAsync(token, {
         secret: process.env.SECRET,
       });
-      request['administrator'] = payload;
+
+      const administrator = await this.administratorRepositoty.findOne({
+        select: ['id', 'username', 'fullName'],
+        where: {
+          id: payload.sub,
+        },
+      });
+      request.administrator = administrator;
     } catch {
       throw new UnauthorizedException();
     }

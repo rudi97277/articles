@@ -10,6 +10,7 @@ import { ArticlesModule } from './articles/articles.module';
 import { DocumentsModule } from './documents/documents.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { ServeStaticModule } from '@nestjs/serve-static';
+import { AdministratorsModule } from './administrators/administrators.module';
 
 @Module({
   imports: [
@@ -20,7 +21,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
       dest: './public/img',
     }),
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'uploads'),
+      rootPath: join(__dirname, '..', 'public'),
     }),
     TypeOrmModule.forRoot({
       type: 'mysql',
@@ -35,6 +36,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
     AuthModule,
     ArticlesModule,
     DocumentsModule,
+    AdministratorsModule,
   ],
   controllers: [AppController],
   providers: [

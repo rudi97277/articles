@@ -26,6 +26,7 @@ export class AuthController {
   @Get('profile')
   @UseGuards(AuthGuard)
   getProfile(@Request() req) {
-    return req.administrator;
+    const { password, ...data } = req.administrator;
+    return data;
   }
 }

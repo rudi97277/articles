@@ -1,66 +1,107 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Article } from './entities/article.entity';
 import { In, Repository } from 'typeorm';
-import { ArticleDocument } from './entities/article-document.entity';
 import { Document } from 'src/documents/entities/document.entity';
+import { DocumentsService } from 'src/documents/documents.service';
 
 @Injectable()
 export class ArticlesService {
   constructor(
     @InjectRepository(Article) private articleRepository: Repository<Article>,
-    @InjectRepository(ArticleDocument)
-    private articleDocumentRepository: Repository<ArticleDocument>,
     @InjectRepository(Document)
     private documentRepository: Repository<Document>,
+    private readonly documentService: DocumentsService,
   ) {}
 
   async create(createArticleDto: CreateArticleDto) {
-    const { documents, coverId, ...articleData } = createArticleDto;
+    const { documentIds, coverId, ...articleData } = createArticleDto;
 
-    const totalDocument: number = documents.length + 1;
-    const allDocument = documents.concat(coverId);
+    //validate documents and cover
 
-    const documentCount = await this.documentRepository.count({
-      where: {
-        id: In([allDocument]),
-      },
-    });
+    const [documents, cover] = await Promise.all([
+      this.documentRepository.find({
+        where: {
+          id: In([documentIds]),
+        },
+      }),
+      this.documentRepository.findOneBy({
+        id: coverId,
+      }),
+    ]);
 
-    if (totalDocument !== documentCount)
+    if (documents.length !== documentIds.length || !cover)
       throw new HttpException('One or more document not found!', 422);
 
     const article = await this.articleRepository.save({
       ...articleData,
-      coverId,
+      cover: cover,
+      documents: documents,
     });
-
-    if (documents) {
-      const formattedDocument = documents.map((document) => {
-        return {
-          documentId: document,
-          articleId: article.id,
-        };
-      });
-
-      await this.articleDocumentRepository.insert(formattedDocument);
-    }
 
     return article;
   }
 
   findAll() {
-    return `This action returns all artics`;
+    return this.articleRepository.find({
+      relations: ['cover'],
+    });
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} article`;
+    return this.articleRepository.findOne({
+      relations: ['cover', 'documents'],
+      where: {
+        id,
+      },
+    });
   }
 
-  update(id: number, updateArticleDto: UpdateArticleDto) {
-    return `This action updates a #${id} article`;
+  async update(id: number, updateArticleDto: UpdateArticleDto) {
+    const article = await this.findOne(id);
+
+    if (!article) throw new NotFoundException('Article not found!');
+
+    const { cover, documents } = article;
+    let { coverId, documentIds, ...data } = updateArticleDto;
+
+    documentIds = documentIds ?? [];
+    coverId = coverId && cover.id === coverId ? null : coverId;
+
+    const deletedDocumentArticle = documents.filter(
+      (document) => !documentIds.includes(document.id),
+    );
+
+    const [documentsCheck, coverCheck] = await Promise.all([
+      this.documentRepository.find({
+        where: {
+          id: documentIds.length > 0 ? In([documentIds]) : '',
+        },
+      }),
+      this.documentRepository.findOneBy({
+        id: coverId ?? '',
+      }),
+    ]);
+
+    Object.assign(article, data);
+
+    if (coverId && coverCheck) article.cover = coverCheck;
+
+    if (documentIds.length > 0 && documentsCheck)
+      article.documents = documentsCheck;
+
+    const articleUpdated = await this.articleRepository.save(article);
+
+    //unlink & delete unused image
+
+    if (coverId && coverCheck) this.documentService.delete([cover]);
+
+    if (documentIds.length > 0 && deletedDocumentArticle)
+      this.documentService.delete(deletedDocumentArticle);
+
+    return articleUpdated;
   }
 
   remove(id: number) {

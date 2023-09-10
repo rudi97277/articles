@@ -18,10 +18,13 @@ export class AuthService {
 
     if (!isMatch) throw new UnauthorizedException();
 
-    const payload = { sub: administrator.id, username: administrator.username };
+    const payload = {
+      sub: administrator.id,
+      username: administrator.username,
+    };
     return {
-      access_token: await this.jwtService.signAsync(payload),
-      full_name: administrator.fullName,
+      accessToken: await this.jwtService.signAsync(payload),
+      fullName: administrator.fullName,
     };
   }
 }

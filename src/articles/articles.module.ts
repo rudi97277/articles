@@ -3,16 +3,17 @@ import { ArticlesService } from './articles.service';
 import { ArticlesController } from './articles.controller';
 import { Article } from './entities/article.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ArticleDocument } from './entities/article-document.entity';
-import { JwtModule } from '@nestjs/jwt';
-import { Document } from 'src/documents/entities/document.entity';
+import { DocumentsModule } from 'src/documents/documents.module';
+import { AdministratorsModule } from 'src/administrators/administrators.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Article, ArticleDocument, Document]),
-    JwtModule,
+    TypeOrmModule.forFeature([Article]),
+    DocumentsModule,
+    AdministratorsModule,
   ],
   controllers: [ArticlesController],
   providers: [ArticlesService],
+  exports: [ArticlesService],
 })
 export class ArticlesModule {}

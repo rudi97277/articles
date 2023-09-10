@@ -1,8 +1,10 @@
 import { Exclude } from 'class-transformer';
+import { Document } from 'src/documents/entities/document.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   Unique,
   UpdateDateColumn,
@@ -21,20 +23,19 @@ export class Administrator {
   @Exclude()
   password: string;
 
-  @Column({
-    name: 'full_name',
-  })
+  @Column()
   fullName: string;
 
   @CreateDateColumn({
-    name: 'created_at',
     type: 'timestamp',
   })
   createdAt: Date;
 
   @UpdateDateColumn({
-    name: 'updated_at',
     type: 'timestamp',
   })
   updatedAt: Date;
+
+  @OneToMany(() => Document, (document) => document.administrator)
+  documents: Document[];
 }

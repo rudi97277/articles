@@ -7,11 +7,12 @@ import {
   UploadedFile,
   Request,
   UseGuards,
+  ConflictException,
 } from '@nestjs/common';
 import { DocumentsService } from './documents.service';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { imageFileFilter, storage } from 'src/storage.config';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { imageFileFilter, storage } from 'src/config/storage.config';
 
 @Controller('documents')
 export class DocumentsController {
@@ -23,11 +24,12 @@ export class DocumentsController {
     FileInterceptor('file', { storage, fileFilter: imageFileFilter }),
   )
   async uploadedFile(@UploadedFile() file, @Request() req) {
-    const { sub } = req.administrator;
+    if (file === undefined || file === null)
+      throw new ConflictException('File must be present!');
 
     const document = this.documentsService.create({
       ...file,
-      administratorId: sub,
+      administrator: req.administrator,
     });
     return document;
   }
