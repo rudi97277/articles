@@ -104,7 +104,11 @@ export class ArticlesService {
     return articleUpdated;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} article`;
+  async remove(id: number) {
+    const article = await this.findOne(id);
+    const { cover, documents } = article;
+    await this.articleRepository.remove(article);
+    this.documentService.delete([cover, ...documents]);
+    return null;
   }
 }

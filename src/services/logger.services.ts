@@ -18,6 +18,10 @@ export class LoggerService {
           maxSize: '20m',
           maxFiles: '7d',
           level: 'error',
+          format: winston.format.combine(
+            winston.format.timestamp(),
+            winston.format.json(),
+          ),
         }),
       ],
     });
