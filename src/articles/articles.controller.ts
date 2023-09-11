@@ -43,7 +43,9 @@ export class ArticlesController {
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateArticleDto: UpdateArticleDto) {
-    return this.articlesService.update(+id, updateArticleDto);
+    return this.articlesService.update(+id, updateArticleDto).catch((err) => {
+      throw new HttpException(mysqlError[err.code] ?? err.message ?? err, 422);
+    });
   }
 
   @Delete(':id')

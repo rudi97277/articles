@@ -106,9 +106,13 @@ export class ArticlesService {
 
   async remove(id: number) {
     const article = await this.findOne(id);
+    if (!article) throw new NotFoundException('Article not found!');
     const { cover, documents } = article;
     await this.articleRepository.remove(article);
     this.documentService.delete([cover, ...documents]);
-    return null;
+
+    return {
+      message: 'Article deleted!',
+    };
   }
 }
