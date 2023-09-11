@@ -12,6 +12,7 @@ import { MulterModule } from '@nestjs/platform-express';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { AdministratorsModule } from './administrators/administrators.module';
 import { HttpExceptionFilter } from './filters/http-exception.filter';
+import { MembershipsModule } from './memberships/memberships.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { HttpExceptionFilter } from './filters/http-exception.filter';
     ArticlesModule,
     DocumentsModule,
     AdministratorsModule,
+    MembershipsModule,
   ],
   controllers: [AppController],
   providers: [
@@ -45,10 +47,10 @@ import { HttpExceptionFilter } from './filters/http-exception.filter';
       provide: APP_PIPE,
       useClass: ValidationPipe,
     },
-    {
-      provide: APP_FILTER,
-      useClass: HttpExceptionFilter,
-    },
+    // {
+    //   provide: APP_FILTER,
+    //   useClass: HttpExceptionFilter,
+    // },
     AppService,
   ],
 })

@@ -50,24 +50,26 @@ export class ArticlesService {
     });
   }
 
-  findOne(id: number) {
-    return this.articleRepository.findOne({
+  async findOne(id: number) {
+    const article = await this.articleRepository.findOne({
       relations: ['cover', 'documents'],
-      where: {
-        id,
-      },
+      where: { id },
     });
+
+    if (!article) throw new NotFoundException('Article not found!');
+
+    return article;
   }
 
   async update(id: number, updateArticleDto: UpdateArticleDto) {
     const article = await this.findOne(id);
 
-    if (!article) throw new NotFoundException('Article not found!');
-
     const { cover, documents } = article;
     let { coverId, documentIds, ...data } = updateArticleDto;
 
     documentIds = documentIds ?? [];
+
+    //check if given coverId is the same with saved cover
     coverId = coverId && cover.id === coverId ? null : coverId;
 
     const deletedDocumentArticle = documents.filter(
@@ -106,7 +108,7 @@ export class ArticlesService {
 
   async remove(id: number) {
     const article = await this.findOne(id);
-    if (!article) throw new NotFoundException('Article not found!');
+
     const { cover, documents } = article;
     await this.articleRepository.remove(article);
     this.documentService.delete([cover, ...documents]);
